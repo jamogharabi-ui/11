@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دروازه — هاب شخصی هوش مصنوعی</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi2K/YsdmI2LLZhyIsInNob3J0X25hbWUiOiLYr9ix2YjYstmHIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMxMjE0MUMiLCJ0aGVtZV9jb2xvciI6IiMxMjE0MUMifQ==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #12141C;
+    --bg-raised: #1A1D28;
+    --bg-input: #20242F;
+    --line: #2A2E3B;
+    --ink: #EDEAE3;
+    --ink-dim: #9296A5;
+    --amber: #E8A33D;
+    --amber-dim: #8A6A38;
+    --red: #D9695F;
+    --green: #6FAE8C;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Vazirmatn', sans-serif;
+    display:flex;
+    flex-direction:column;
+    overscroll-behavior:none;
+  }
+  #app{
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    height:100dvh;
+    max-width:560px;
+    margin:0 auto;
+    width:100%;
+  }
+
+  /* header */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 18px 10px;
+    flex-shrink:0;
+  }
+  .brand{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .brand-name{
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:0.3px;
+  }
+  .brand-sub{
+    font-size:12px;
+    color:var(--ink-dim);
+  }
+  .icon-btn{
+    background:none;
+    border:1px solid var(--line);
+    color:var(--ink-dim);
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:17px;
+    transition: border-color .15s, color .15s;
+  }
+  .icon-btn:active{ transform: scale(0.94); }
+  .icon-btn:hover{ border-color: var(--amber-dim); color: var(--amber); }
+
+  /* provider rail */
+  #providerRail{
+    display:flex;
+    gap:8px;
+    padding:4px 18px 14px;
+    overflow-x:auto;
+    flex-shrink:0;
+    scrollbar-width:none;
+  }
+  #providerRail::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:8px 14px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:var(--bg-raised);
+    color:var(--ink-dim);
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    user-select:none;
+    transition: all .15s;
+    white-space:nowrap;
+  }
+  .chip .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--ink-dim);
+    flex-shrink:0;
+  }
+  .chip.has-key .dot{ background: var(--green); }
+  .chip.active{
+    border-color: var(--amber);
+    color: var(--ink);
+    background: rgba(232,163,61,0.10);
+  }
+  .chip.active .dot{ background: var(--amber); }
+  .chip.add{
+    color: var(--amber-dim);
+    border-style:dashed;
+  }
+
+  /* compare toggle row */
+  #compareRow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px 12px;
+    flex-shrink:0;
+  }
+  #compareRow span{ font-size:12.5px; color:var(--ink-dim); }
+  .switch{
+    width:38px; height:22px; border-radius:20px;
+    background:var(--bg-input);
+    border:1px solid var(--line);
+    position:relative;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .switch .knob{
+    position:absolute; top:2px; right:2px;
+    width:16px; height:16px; border-radius:50%;
+    background:var(--ink-dim);
+    transition: all .18s;
+  }
+  .switch.on{ border-color:var(--amber-dim); }
+  .switch.on .knob{ right:18px; background:var(--amber); }
+
+  /* chat */
+  #chat{
+    flex:1;
+    overflow-y:auto;
+    padding:6px 18px 12px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .empty-state{
+    margin:auto;
+    text-align:center;
+    color:var(--ink-dim);
+    font-size:13.5px;
+    line-height:2;
+    padding:0 20px;
+  }
+  .msg{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    max-width:88%;
+  }
+  .msg.user{ align-self:flex-start; align-items:flex-start; }
+  .msg.bot{ align-self:flex-end; align-items:flex-end; width:100%; }
+  .msg .label{
+    font-size:11px;
+    color:var(--ink-dim);
+    padding:0 4px;
+  }
+  .bubble{
+    padding:11px 14px;
+    border-radius:14px;
+    font-size:14.5px;
+    line-height:1.9;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  .msg.user .bubble{
+    background:var(--bg-input);
+    border-top-right-radius:4px;
+  }
+  .msg.bot .bubble{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-top-left-radius:4px;
+    width:100%;
+  }
+  .msg.bot .bubble.err{
+    border-color: rgba(217,105,95,0.5);
+    color: var(--red);
+  }
+  .compare-grid{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    width:100%;
+  }
+  .compare-card{
+    border:1px solid var(--line);
+    background:var(--bg-raised);
+    border-radius:12px;
+    padding:10px 13px;
+    width:100%;
+  }
+  .compare-card .who{
+    font-size:11px;
+    color:var(--amber);
+    font-weight:600;
+    margin-bottom:5px;
+  }
+  .compare-card .body{
+    font-size:14px;
+    line-height:1.85;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  .typing{
+    display:inline-flex;
+    gap:4px;
+    padding:4px 0;
+  }
+  .typing span{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--ink-dim);
+    animation: blink 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2){ animation-delay:.2s; }
+  .typing span:nth-child(3){ animation-delay:.4s; }
+  @keyframes blink{ 0%,80%,100%{opacity:.25;} 40%{opacity:1;} }
+
+  /* input bar */
+  #inputBar{
+    flex-shrink:0;
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    padding:10px 14px calc(14px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);
+    background:var(--bg);
+  }
+  #textInput{
+    flex:1;
+    resize:none;
+    max-height:110px;
+    background:var(--bg-input);
+    border:1px solid var(--line);
+    border-radius:16px;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:14.5px;
+    padding:11px 14px;
+    outline:none;
+    line-height:1.6;
+  }
+  #textInput:focus{ border-color: var(--amber-dim); }
+  #sendBtn{
+    flex-shrink:0;
+    width:42px; height:42px;
+    border-radius:50%;
+    border:none;
+    background:var(--amber);
+    color:#1A1300;
+    font-size:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  #sendBtn:disabled{ background:var(--line); color:var(--ink-dim); }
+  #sendBtn:active:not(:disabled){ transform: scale(0.92); }
+
+  #attachBtn, #micBtn{
+    flex-shrink:0;
+    width:42px; height:42px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--bg-input);
+    color:var(--ink-dim);
+    font-size:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition: all .15s;
+  }
+  #attachBtn:active, #micBtn:active{ transform: scale(0.92); }
+  #micBtn.recording{
+    border-color: var(--red);
+    color: var(--red);
+    background: rgba(217,105,95,0.12);
+    animation: micPulse 1.1s infinite ease-in-out;
+  }
+  @keyframes micPulse{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(217,105,95,0.35); }
+    50%{ box-shadow: 0 0 0 6px rgba(217,105,95,0); }
+  }
+
+  #attachPreview{
+    display:flex;
+    gap:8px;
+    padding:0 14px 8px;
+    flex-shrink:0;
+    overflow-x:auto;
+  }
+  #attachPreview:empty{ display:none; }
+  .attach-chip{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:var(--bg-input);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:6px 10px;
+    font-size:12px;
+    color:var(--ink-dim);
+    flex-shrink:0;
+  }
+  .attach-chip img{
+    width:28px; height:28px;
+    border-radius:6px;
+    object-fit:cover;
+  }
+  .attach-chip .remove{
+    background:none;
+    border:none;
+    color:var(--ink-dim);
+    cursor:pointer;
+    font-size:14px;
+    padding:0 2px;
+  }
+
+  /* history sheet */
+  .history-day{
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition: border-color .15s;
+  }
+  .history-day:active{ border-color:var(--amber-dim); }
+  .history-day .day-label{
+    font-size:12px;
+    color:var(--amber);
+    font-weight:600;
+    margin-bottom:5px;
+  }
+  .history-day .day-preview{
+    font-size:13px;
+    color:var(--ink-dim);
+    line-height:1.7;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  #historyEmpty{
+    text-align:center;
+    color:var(--ink-dim);
+    font-size:13px;
+    padding:20px 0;
+  }
+
+  .sheet-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:4px;
+  }
+  .sheet-close{
+    background:none;
+    border:none;
+    color:var(--ink-dim);
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+    padding:4px 8px;
+    flex-shrink:0;
+  }
+  .sheet-close:active{ color:var(--amber); }
+
+  /* settings modal */
+  #overlay{
+    position:fixed; inset:0;
+    background:rgba(8,9,13,0.72);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  #overlay.show{ display:flex; }
+  #historyOverlay{
+    position:fixed; inset:0;
+    background:rgba(8,9,13,0.72);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  #historyOverlay.show{ display:flex; }
+  #historySheet{
+    background:var(--bg-raised);
+    width:100%;
+    max-width:560px;
+    max-height:86vh;
+    border-radius:20px 20px 0 0;
+    overflow-y:auto;
+    padding:20px 20px calc(24px + env(safe-area-inset-bottom));
+    border:1px solid var(--line);
+    border-bottom:none;
+  }
+  #historySheet h2{ font-size:17px; margin:0 0 4px; }
+  #historySheet .hint{
+    font-size:12px;
+    color:var(--ink-dim);
+    line-height:1.8;
+    margin:0 0 18px;
+  }
+  #sheet{
+    background:var(--bg-raised);
+    width:100%;
+    max-width:560px;
+    max-height:86vh;
+    border-radius:20px 20px 0 0;
+    overflow-y:auto;
+    padding:20px 20px calc(24px + env(safe-area-inset-bottom));
+    border:1px solid var(--line);
+    border-bottom:none;
+  }
+  #sheet h2{
+    font-size:17px;
+    margin:0 0 4px;
+  }
+  #sheet .hint{
+    font-size:12px;
+    color:var(--ink-dim);
+    line-height:1.8;
+    margin:0 0 18px;
+  }
+  .provider-block{
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .provider-block .ptitle{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .provider-block .ptitle .name{
+    font-weight:600;
+    font-size:14px;
+  }
+  .provider-block .ptitle .remove{
+    font-size:12px;
+    color:var(--red);
+    cursor:pointer;
+    background:none;
+    border:none;
+  }
+  .field{
+    margin-bottom:8px;
+  }
+  .field label{
+    display:block;
+    font-size:11.5px;
+    color:var(--ink-dim);
+    margin-bottom:5px;
+  }
+  .field input{
+    width:100%;
+    background:var(--bg-input);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:13.5px;
+    padding:9px 12px;
+    outline:none;
+  }
+  .field input:focus{ border-color:var(--amber-dim); }
+  #addCustomBtn, #saveBtn{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:1px dashed var(--line);
+    background:none;
+    color:var(--ink-dim);
+    font-family:inherit;
+    font-size:13.5px;
+    cursor:pointer;
+    margin-bottom:10px;
+  }
+  #saveBtn{
+    border-style:solid;
+    background:var(--amber);
+    color:#1A1300;
+    font-weight:600;
+    border:none;
+  }
+  #clearChatBtn{
+    width:100%;
+    padding:10px;
+    background:none;
+    border:none;
+    color:var(--ink-dim);
+    font-family:inherit;
+    font-size:12.5px;
+    cursor:pointer;
+    text-decoration:underline;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="brand">
+      <div class="brand-name">دروازه</div>
+      <div class="brand-sub" id="activeLine">هاب شخصی هوش مصنوعی</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="icon-btn" id="historyBtn" aria-label="تاریخچه">🕘</button>
+      <button class="icon-btn" id="settingsBtn" aria-label="تنظیمات">⚙</button>
+    </div>
+  </header>
+
+  <div id="providerRail"></div>
+
+  <div id="compareRow">
+    <span>ارسال هم‌زمان به همه‌ی سرویس‌های دارای کلید</span>
+    <div class="switch" id="compareSwitch"><div class="knob"></div></div>
+  </div>
+
+  <div id="chat">
+    <div class="empty-state" id="emptyState">
+      هنوز پیامی نیست.<br>
+      از تنظیمات (⚙) کلید API سرویس‌هات رو وارد کن، یکی رو انتخاب کن و شروع کن به چت.
+    </div>
+  </div>
+
+  <div id="attachPreview"></div>
+  <div id="inputBar">
+    <input type="file" id="fileInput" accept="image/*,.txt,.md,.csv,.json" multiple style="display:none">
+    <button id="attachBtn" aria-label="افزودن فایل یا عکس">+</button>
+    <textarea id="textInput" rows="1" placeholder="پیامت رو بنویس…"></textarea>
+    <button id="micBtn" aria-label="ورودی صوتی">🎤</button>
+    <button id="sendBtn" aria-label="ارسال">➤</button>
+  </div>
+</div>
+
+<div id="overlay">
+  <div id="sheet">
+    <div class="sheet-head">
+      <h2>تنظیمات سرویس‌ها</h2>
+      <button class="sheet-close" id="closeSettingsBtn" aria-label="بستن">×</button>
+    </div>
+    <p class="hint">کلیدهای API فقط روی همین گوشی و در همین مرورگر ذخیره می‌شن و به هیچ سروری جز همون سرویس ارسال نمی‌شن. اگه این صفحه رو داخل پیش‌نمایش کلود باز کردی، برای ذخیره‌ی دائمی بهتره فایل رو دانلود کنی و مستقیم توی مرورگر گوشیت (یا با «افزودن به صفحه اصلی») بازش کنی.</p>
+    <div id="providerForms"></div>
+    <button id="addCustomBtn">+ افزودن سرویس سفارشی (سازگار با OpenAI)</button>
+    <button id="saveBtn">ذخیره تنظیمات</button>
+    <button id="clearChatBtn">پاک کردن تاریخچه‌ی گفتگو</button>
+  </div>
+</div>
+
+<div id="historyOverlay">
+  <div id="historySheet">
+    <div class="sheet-head">
+      <h2>سرخط روزهای گذشته</h2>
+      <button class="sheet-close" id="closeHistoryBtn" aria-label="بستن">×</button>
+    </div>
+    <p class="hint">روی هر روز بزن تا توی گفتگو به همون‌جا بری.</p>
+    <div id="historyList"></div>
+    <div id="historyEmpty" style="display:none;">هنوز گفتگویی ثبت نشده.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'darvaze_config_v1';
+  const HISTORY_KEY = 'darvaze_history_v1';
+
+  const DEFAULT_PROVIDERS = [
+    { id:'gemini',     builtin:true, kind:'gemini', label:'Gemini',     model:'gemini-2.0-flash', key:'' },
+    { id:'groq',       builtin:true, kind:'openai', label:'Groq',       model:'llama-3.3-70b-versatile', endpoint:'https://api.groq.com/openai/v1/chat/completions', key:'' },
+    { id:'openrouter', builtin:true, kind:'openai', label:'OpenRouter', model:'meta-llama/llama-3.1-8b-instruct:free', endpoint:'https://openrouter.ai/api/v1/chat/completions', key:'' },
+  ];
+
+  let state = {
+    providers: DEFAULT_PROVIDERS.map(p => ({...p})),
+    activeId: 'openai',
+    compare: false
+  };
+
+  let history = []; // {role:'user'|'bot', text, providerLabel?, compareResults?}
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(parsed && Array.isArray(parsed.providers)){
+          state = parsed;
+        }
+      }
+    }catch(e){ console.warn('could not load config', e); }
+    try{
+      const rawH = localStorage.getItem(HISTORY_KEY);
+      if(rawH) history = JSON.parse(rawH);
+    }catch(e){ console.warn('could not load history', e); }
+  }
+
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch(e){ console.warn('could not save config', e); }
+  }
+  function saveHistory(){
+    try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+    catch(e){ console.warn('could not save history', e); }
+  }
+
+  function activeProvider(){
+    return state.providers.find(p => p.id === state.activeId) || state.providers[0];
+  }
+
+  // ---------- rendering ----------
+  const rail = document.getElementById('providerRail');
+  const chat = document.getElementById('chat');
+  const emptyState = document.getElementById('emptyState');
+  const activeLine = document.getElementById('activeLine');
+  const compareSwitch = document.getElementById('compareSwitch');
+
+  function renderRail(){
+    rail.innerHTML = '';
+    state.providers.forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (p.key ? ' has-key' : '') + (p.id === state.activeId ? ' active' : '');
+      chip.innerHTML = `<span class="dot"></span><span>${escapeHtml(p.label)}</span>`;
+      chip.onclick = () => { state.activeId = p.id; saveState(); renderRail(); renderActiveLine(); };
+      rail.appendChild(chip);
+    });
+    const addChip = document.createElement('div');
+    addChip.className = 'chip add';
+    addChip.textContent = '+ سرویس';
+    addChip.onclick = openSettings;
+    rail.appendChild(addChip);
+  }
+
+  function renderActiveLine(){
+    if(state.compare){
+      const withKey = state.providers.filter(p => p.key).map(p => p.label);
+      activeLine.textContent = withKey.length ? `حالت مقایسه: ${withKey.join('، ')}` : 'حالت مقایسه — هیچ کلیدی ثبت نشده';
+    } else {
+      const p = activeProvider();
+      activeLine.textContent = p ? `فعال: ${p.label}${p.key ? '' : ' (کلید ثبت نشده)'}` : 'سرویسی انتخاب نشده';
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderHistory(){
+    chat.innerHTML = '';
+    if(history.length === 0){
+      chat.appendChild(emptyState);
+      return;
+    }
+    history.forEach(h => appendMessageEl(h, false));
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function appendMessageEl(h, scroll=true){
+    if(emptyState.parentNode) emptyState.remove();
+    const wrap = document.createElement('div');
+    if(h.ts) wrap.setAttribute('data-ts', h.ts);
+    if(h.role === 'user'){
+      wrap.className = 'msg user';
+      let thumbs = '';
+      if(h.attachments && h.attachments.length){
+        thumbs = '<div style="display:flex; gap:6px; margin-bottom:5px; flex-wrap:wrap;">' +
+          h.attachments.map(a => a.kind === 'image'
+            ? `<img src="${a.dataUrl}" style="width:64px;height:64px;border-radius:8px;object-fit:cover;">`
+            : `<span style="font-size:11px; background:var(--bg-input); border:1px solid var(--line); border-radius:8px; padding:4px 8px; color:var(--ink-dim);">📎 ${escapeHtml(a.name)}</span>`
+          ).join('') + '</div>';
+      }
+      wrap.innerHTML = `${thumbs}<div class="bubble">${escapeHtml(h.text)}</div>`;
+    } else if(h.role === 'compare'){
+      wrap.className = 'msg bot';
+      const grid = document.createElement('div');
+      grid.className = 'compare-grid';
+      h.results.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'compare-card';
+        card.innerHTML = `<div class="who">${escapeHtml(r.label)}</div><div class="body">${escapeHtml(r.text)}</div>`;
+        grid.appendChild(card);
+      });
+      wrap.appendChild(grid);
+    } else {
+      wrap.className = 'msg bot';
+      wrap.innerHTML = `<div class="label">${escapeHtml(h.providerLabel||'')}</div><div class="bubble${h.error?' err':''}">${escapeHtml(h.text)}</div>`;
+    }
+    chat.appendChild(wrap);
+    if(scroll) chat.scrollTop = chat.scrollHeight;
+    return wrap;
+  }
+
+  // ---------- API callers ----------
+  // images: array of {kind:'image', dataUrl, mime, name}
+  async function callOpenAICompatible(provider, userText, endpointOverride, images){
+    const endpoint = endpointOverride || provider.endpoint || 'https://api.openai.com/v1/chat/completions';
+    let content = userText;
+    if(images && images.length){
+      content = [{ type:'text', text: userText || ' ' }].concat(
+        images.map(img => ({ type:'image_url', image_url:{ url: img.dataUrl } }))
+      );
+    }
+    const res = await fetch(endpoint, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization': `Bearer ${provider.key}`
+      },
+      body: JSON.stringify({
+        model: provider.model,
+        messages: [{ role:'user', content }]
+      })
+    });
+    if(!res.ok){
+      const t = await res.text().catch(()=> '');
+      throw new Error(`خطای سرویس (${res.status}): ${t.slice(0,200)}`);
+    }
+    const data = await res.json();
+    return data?.choices?.[0]?.message?.content ?? '(پاسخ خالی)';
+  }
+
+  async function callGemini(provider, userText, images){
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(provider.model)}:generateContent?key=${encodeURIComponent(provider.key)}`;
+    const parts = [{ text: userText || ' ' }];
+    if(images && images.length){
+      images.forEach(img => {
+        parts.push({ inlineData: { mimeType: img.mime, data: img.dataUrl.split(',')[1] } });
+      });
+    }
+    const res = await fetch(endpoint, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts }]
+      })
+    });
+    if(!res.ok){
+      const t = await res.text().catch(()=> '');
+      throw new Error(`خطای سرویس (${res.status}): ${t.slice(0,200)}`);
+    }
+    const data = await res.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '(پاسخ خالی)';
+  }
+
+  async function callAnthropic(provider, userText, images){
+    let content = userText;
+    if(images && images.length){
+      content = images.map(img => ({
+        type:'image',
+        source:{ type:'base64', media_type: img.mime, data: img.dataUrl.split(',')[1] }
+      })).concat([{ type:'text', text: userText || ' ' }]);
+    }
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': provider.key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: provider.model,
+        max_tokens: 1024,
+        messages: [{ role:'user', content }]
+      })
+    });
+    if(!res.ok){
+      const t = await res.text().catch(()=> '');
+      throw new Error(`خطای سرویس (${res.status}): ${t.slice(0,200)}`);
+    }
+    const data = await res.json();
+    return data?.content?.map(b => b.text || '').join('\n') || '(پاسخ خالی)';
+  }
+
+  async function callProvider(provider, userText, images){
+    if(!provider.key) throw new Error('کلید API ثبت نشده');
+    if(provider.kind === 'openai') return callOpenAICompatible(provider, userText, null, images);
+    if(provider.kind === 'gemini') return callGemini(provider, userText, images);
+    if(provider.kind === 'anthropic') return callAnthropic(provider, userText, images);
+    if(provider.kind === 'custom') return callOpenAICompatible(provider, userText, provider.endpoint, images);
+    throw new Error('نوع سرویس ناشناخته');
+  }
+
+  // ---------- send flow ----------
+  const textInput = document.getElementById('textInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const attachBtn = document.getElementById('attachBtn');
+  const fileInput = document.getElementById('fileInput');
+  const attachPreview = document.getElementById('attachPreview');
+  const micBtn = document.getElementById('micBtn');
+
+  let pendingAttachments = []; // {kind:'image'|'text', name, dataUrl?, mime?, content?}
+
+  textInput.addEventListener('input', () => {
+    textInput.style.height = 'auto';
+    textInput.style.height = Math.min(textInput.scrollHeight, 110) + 'px';
+  });
+  textInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      handleSend();
+    }
+  });
+  sendBtn.addEventListener('click', handleSend);
+
+  // ---- attachments (+ button) ----
+  attachBtn.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', () => {
+    const files = Array.from(fileInput.files || []);
+    files.forEach(file => {
+      const reader = new FileReader();
+      if(file.type.startsWith('image/')){
+        reader.onload = () => {
+          pendingAttachments.push({ kind:'image', name:file.name, mime:file.type, dataUrl: reader.result });
+          renderAttachPreview();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        reader.onload = () => {
+          pendingAttachments.push({ kind:'text', name:file.name, content: String(reader.result).slice(0, 8000) });
+          renderAttachPreview();
+        };
+        reader.readAsText(file);
+      }
+    });
+    fileInput.value = '';
+  });
+
+  function renderAttachPreview(){
+    attachPreview.innerHTML = '';
+    pendingAttachments.forEach((a, idx) => {
+      const chip = document.createElement('div');
+      chip.className = 'attach-chip';
+      chip.innerHTML = a.kind === 'image'
+        ? `<img src="${a.dataUrl}"><span class="remove" data-idx="${idx}">×</span>`
+        : `<span>📎 ${escapeHtml(a.name)}</span><span class="remove" data-idx="${idx}">×</span>`;
+      attachPreview.appendChild(chip);
+    });
+    attachPreview.querySelectorAll('.remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pendingAttachments.splice(Number(btn.getAttribute('data-idx')), 1);
+        renderAttachPreview();
+      });
+    });
+  }
+
+  // ---- voice input (mic button, like Gemini) ----
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognizer = null;
+  let recognizing = false;
+  if(SpeechRec){
+    recognizer = new SpeechRec();
+    recognizer.lang = 'fa-IR';
+    recognizer.interimResults = true;
+    recognizer.continuous = true;
+    let baseText = '';
+    recognizer.onstart = () => {
+      recognizing = true;
+      baseText = textInput.value ? textInput.value + ' ' : '';
+      micBtn.classList.add('recording');
+    };
+    recognizer.onresult = (e) => {
+      let transcript = '';
+      for(let i = 0; i < e.results.length; i++){
+        transcript += e.results[i][0].transcript;
+      }
+      textInput.value = baseText + transcript;
+      textInput.style.height = 'auto';
+      textInput.style.height = Math.min(textInput.scrollHeight, 110) + 'px';
+    };
+    recognizer.onerror = () => { recognizing = false; micBtn.classList.remove('recording'); };
+    recognizer.onend = () => { recognizing = false; micBtn.classList.remove('recording'); };
+    micBtn.addEventListener('click', () => {
+      if(recognizing){ recognizer.stop(); }
+      else { recognizer.start(); }
+    });
+  } else {
+    micBtn.addEventListener('click', () => {
+      pushBotError('مرورگرت از ورودی صوتی پشتیبانی نمی‌کنه. از کروم روی اندروید امتحان کن.');
+    });
+  }
+
+  async function handleSend(){
+    const text = textInput.value.trim();
+    if(!text && pendingAttachments.length === 0) return;
+    textInput.value = '';
+    textInput.style.height = 'auto';
+
+    const attachments = pendingAttachments;
+    pendingAttachments = [];
+    renderAttachPreview();
+
+    // fold text-file contents into the prompt sent to the model
+    let effectiveText = text;
+    attachments.filter(a => a.kind === 'text').forEach(a => {
+      effectiveText += `\n\n[محتوای فایل «${a.name}»]:\n${a.content}`;
+    });
+    const images = attachments.filter(a => a.kind === 'image');
+
+    history.push({ role:'user', text, attachments, ts: Date.now() });
+    appendMessageEl(history[history.length-1]);
+    saveHistory();
+
+    if(state.compare){
+      const keyed = state.providers.filter(p => p.key);
+      if(keyed.length === 0){
+        pushBotError('هیچ سرویسی کلید ثبت‌شده نداره. اول از تنظیمات یک کلید وارد کن.');
+        return;
+      }
+      const placeholder = appendTyping();
+      const results = await Promise.all(keyed.map(async p => {
+        try{
+          const text = await callProvider(p, effectiveText, images);
+          return { label:p.label, text };
+        }catch(err){
+          return { label:p.label, text:'خطا: ' + err.message };
+        }
+      }));
+      placeholder.remove();
+      const entry = { role:'compare', results, ts: Date.now() };
+      history.push(entry);
+      appendMessageEl(entry);
+      saveHistory();
+    } else {
+      const p = activeProvider();
+      if(!p || !p.key){
+        pushBotError('برای این سرویس کلید API ثبت نشده. از ⚙ تنظیمات وارد کن.');
+        return;
+      }
+      const placeholder = appendTyping();
+      try{
+        const reply = await callProvider(p, effectiveText, images);
+        placeholder.remove();
+        const entry = { role:'bot', providerLabel:p.label, text:reply, ts: Date.now() };
+        history.push(entry);
+        appendMessageEl(entry);
+        saveHistory();
+      }catch(err){
+        placeholder.remove();
+        const entry = { role:'bot', providerLabel:p.label, text:'خطا: ' + err.message, error:true };
+        history.push(entry);
+        appendMessageEl(entry);
+        saveHistory();
+      }
+    }
+  }
+
+  function text_of_last(){
+    for(let i = history.length-1; i>=0; i--){
+      if(history[i].role === 'user') return history[i].text;
+    }
+    return '';
+  }
+
+  function pushBotError(msg){
+    const entry = { role:'bot', providerLabel:'سیستم', text: msg, error:true };
+    history.push(entry);
+    appendMessageEl(entry);
+    saveHistory();
+  }
+
+  function appendTyping(){
+    if(emptyState.parentNode) emptyState.remove();
+    const wrap = document.createElement('div');
+    wrap.className = 'msg bot';
+    wrap.innerHTML = `<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+    return wrap;
+  }
+
+  // ---------- settings sheet ----------
+  const overlay = document.getElementById('overlay');
+  const providerForms = document.getElementById('providerForms');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const addCustomBtn = document.getElementById('addCustomBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const clearChatBtn = document.getElementById('clearChatBtn');
+
+  function openSettings(){
+    renderForms();
+    overlay.classList.add('show');
+  }
+  function closeSettings(){
+    overlay.classList.remove('show');
+  }
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeSettings(); });
+  settingsBtn.addEventListener('click', openSettings);
+  document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
+
+  function renderForms(){
+    providerForms.innerHTML = '';
+    state.providers.forEach((p) => {
+      const block = document.createElement('div');
+      block.className = 'provider-block';
+      block.innerHTML = `
+        <div class="ptitle">
+          <span class="name">${escapeHtml(p.label)}</span>
+          ${p.builtin ? '' : '<button class="remove" data-id="'+p.id+'">حذف</button>'}
+        </div>
+        ${p.kind === 'custom' ? `
+        <div class="field">
+          <label>نام سرویس</label>
+          <input type="text" data-field="label" data-id="${p.id}" value="${escapeHtml(p.label)}">
+        </div>` : ''}
+        ${(p.kind === 'custom' || p.endpoint) ? `
+        <div class="field">
+          <label>آدرس Endpoint (سازگار با OpenAI chat/completions)</label>
+          <input type="text" data-field="endpoint" data-id="${p.id}" value="${escapeHtml(p.endpoint||'')}" placeholder="https://...">
+        </div>` : ''}
+        <div class="field">
+          <label>نام مدل</label>
+          <input type="text" data-field="model" data-id="${p.id}" value="${escapeHtml(p.model)}">
+        </div>
+        <div class="field">
+          <label>کلید API</label>
+          <input type="password" data-field="key" data-id="${p.id}" value="${escapeHtml(p.key)}" placeholder="sk-...">
+        </div>
+      `;
+      providerForms.appendChild(block);
+    });
+    providerForms.querySelectorAll('.remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        state.providers = state.providers.filter(p => p.id !== id);
+        if(state.activeId === id) state.activeId = state.providers[0]?.id;
+        renderForms();
+      });
+    });
+  }
+
+  addCustomBtn.addEventListener('click', () => {
+    const id = 'custom_' + Date.now();
+    state.providers.push({ id, builtin:false, kind:'custom', label:'سرویس جدید', model:'', endpoint:'', key:'' });
+    renderForms();
+  });
+
+  saveBtn.addEventListener('click', () => {
+    providerForms.querySelectorAll('input[data-field]').forEach(inp => {
+      const id = inp.getAttribute('data-id');
+      const field = inp.getAttribute('data-field');
+      const p = state.providers.find(x => x.id === id);
+      if(p) p[field] = inp.value.trim();
+    });
+    if(!state.providers.find(p => p.id === state.activeId)){
+      state.activeId = state.providers[0]?.id;
+    }
+    saveState();
+    renderRail();
+    renderActiveLine();
+    closeSettings();
+  });
+
+  clearChatBtn.addEventListener('click', () => {
+    history = [];
+    saveHistory();
+    renderHistory();
+    closeSettings();
+  });
+
+  compareSwitch.addEventListener('click', () => {
+    state.compare = !state.compare;
+    compareSwitch.classList.toggle('on', state.compare);
+    saveState();
+    renderActiveLine();
+  });
+
+  // ---------- history / day headlines sheet ----------
+  const historyOverlay = document.getElementById('historyOverlay');
+  const historyList = document.getElementById('historyList');
+  const historyEmpty = document.getElementById('historyEmpty');
+  const historyBtn = document.getElementById('historyBtn');
+  const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+
+  function dayKey(ts){
+    const d = new Date(ts);
+    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+  }
+  function dayLabel(ts){
+    const d = new Date(ts);
+    const today = new Date();
+    const yesterday = new Date(); yesterday.setDate(today.getDate()-1);
+    if(dayKey(ts) === dayKey(today.getTime())) return 'امروز';
+    if(dayKey(ts) === dayKey(yesterday.getTime())) return 'دیروز';
+    return d.toLocaleDateString('fa-IR');
+  }
+
+  function openHistory(){
+    renderHistoryList();
+    historyOverlay.classList.add('show');
+  }
+  function closeHistory(){
+    historyOverlay.classList.remove('show');
+  }
+  historyOverlay.addEventListener('click', (e) => { if(e.target === historyOverlay) closeHistory(); });
+  historyBtn.addEventListener('click', openHistory);
+  closeHistoryBtn.addEventListener('click', closeHistory);
+
+  function renderHistoryList(){
+    historyList.innerHTML = '';
+    const dayMap = new Map(); // key -> { ts, firstUserText }
+    history.forEach(h => {
+      if(h.role !== 'user' || !h.ts) return;
+      const key = dayKey(h.ts);
+      if(!dayMap.has(key)){
+        dayMap.set(key, { ts: h.ts, preview: h.text || '(فقط پیوست)' });
+      }
+    });
+    const days = Array.from(dayMap.values()).sort((a,b) => b.ts - a.ts);
+    historyEmpty.style.display = days.length ? 'none' : 'block';
+    days.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'history-day';
+      el.innerHTML = `<div class="day-label">${dayLabel(d.ts)}</div><div class="day-preview">${escapeHtml(d.preview)}</div>`;
+      el.addEventListener('click', () => {
+        closeHistory();
+        jumpToTs(d.ts);
+      });
+      historyList.appendChild(el);
+    });
+  }
+
+  function jumpToTs(ts){
+    const target = chat.querySelector(`[data-ts="${ts}"]`);
+    if(target){
+      target.scrollIntoView({ behavior:'smooth', block:'start' });
+      target.style.transition = 'background-color .3s';
+      target.style.backgroundColor = 'rgba(232,163,61,0.12)';
+      setTimeout(() => { target.style.backgroundColor = ''; }, 900);
+    }
+  }
+
+  // ---------- init ----------
+  loadState();
+  compareSwitch.classList.toggle('on', state.compare);
+  renderRail();
+  renderActiveLine();
+  renderHistory();
+
+  // open settings automatically on first run if no key at all
+  if(!state.providers.some(p => p.key)){
+    setTimeout(openSettings, 300);
+  }
+})();
+</script>
+</body>
+</html>
