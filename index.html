@@ -598,6 +598,7 @@
 
   const DEFAULT_PROVIDERS = [
     { id:'gemini',     builtin:true, kind:'gemini', label:'Gemini',     model:'gemini-2.0-flash', key:'' },
+    { id:'claude',     builtin:true, kind:'anthropic', label:'Claude',  model:'claude-sonnet-5', key:'' },
     { id:'groq',       builtin:true, kind:'openai', label:'Groq',       model:'llama-3.3-70b-versatile', endpoint:'https://api.groq.com/openai/v1/chat/completions', key:'' },
     { id:'openrouter', builtin:true, kind:'openai', label:'OpenRouter', model:'meta-llama/llama-3.1-8b-instruct:free', endpoint:'https://openrouter.ai/api/v1/chat/completions', key:'' },
   ];
@@ -617,6 +618,12 @@
         const parsed = JSON.parse(raw);
         if(parsed && Array.isArray(parsed.providers)){
           state = parsed;
+          // add any new builtin providers (e.g. added in an app update) that aren't in the saved config yet
+          DEFAULT_PROVIDERS.forEach(dp => {
+            if(!state.providers.some(p => p.id === dp.id)){
+              state.providers.push({ ...dp });
+            }
+          });
         }
       }
     }catch(e){ console.warn('could not load config', e); }
