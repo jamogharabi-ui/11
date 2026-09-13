@@ -596,6 +596,14 @@
   const STORAGE_KEY = 'darvaze_config_v1';
   const HISTORY_KEY = 'darvaze_history_v1';
 
+  // آدرس Worker پراکسی؛ بعد از دیپلوی روی Cloudflare همین‌جا جایگزین کن
+  // مثال: 'https://darvaze-proxy.your-subdomain.workers.dev'
+  const PROXY_BASE = 'https://tiny-thunder-21ab.ja-mogharabi.workers.dev';
+
+  function proxied(targetUrl){
+    return `${PROXY_BASE}/proxy?target=${encodeURIComponent(targetUrl)}`;
+  }
+
   const DEFAULT_PROVIDERS = [
     { id:'gemini',     builtin:true, kind:'gemini', label:'Gemini',     model:'gemini-2.0-flash', key:'' },
     { id:'claude',     builtin:true, kind:'anthropic', label:'Claude',  model:'claude-sonnet-5', key:'' },
@@ -738,7 +746,7 @@
         images.map(img => ({ type:'image_url', image_url:{ url: img.dataUrl } }))
       );
     }
-    const res = await fetch(endpoint, {
+    const res = await fetch(proxied(endpoint), {
       method:'POST',
       headers:{
         'Content-Type':'application/json',
@@ -765,7 +773,7 @@
         parts.push({ inlineData: { mimeType: img.mime, data: img.dataUrl.split(',')[1] } });
       });
     }
-    const res = await fetch(endpoint, {
+    const res = await fetch(proxied(endpoint), {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({
@@ -788,7 +796,7 @@
         source:{ type:'base64', media_type: img.mime, data: img.dataUrl.split(',')[1] }
       })).concat([{ type:'text', text: userText || ' ' }]);
     }
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(proxied('https://api.anthropic.com/v1/messages'), {
       method:'POST',
       headers:{
         'Content-Type':'application/json',
